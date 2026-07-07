@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect with Marcus</title>
+
+    <!-- Open Graph meta tags for social sharing -->
+    <meta property="og:title" content="Connect with Marcus">
+    <meta property="og:description" content="Drop your details and let's continue the conversation.">
+    <meta property="og:type" content="website">
+
+    <!-- Tailwind CSS Play CDN - zero build step -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Cloudflare Turnstile bot protection -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</head>
+
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-4">
+    <main class="w-full max-w-md mx-auto">
+
+        <!-- Hero: Marcus's identity and StoryBrand one-liner -->
+        <section class="text-center mb-8" aria-label="About Marcus">
+            <img src="marcus-photo.jpg" alt="Marcus - Technology Leader"
+                class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
+            <h1 class="text-2xl font-bold mb-2">Marcus</h1>
+            <p class="text-gray-300">Helping leaders build systems that scale without burning out.</p>
+        </section>
+
+        <!-- Contact quick-links: LinkedIn prefill, mailto, tel -->
+        <nav class="flex justify-center gap-4 mb-8" aria-label="Contact links">
+            <a href="https://linkedin.com/in/marcus" target="_blank" rel="noopener"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-400"
+                aria-label="Connect on LinkedIn">LinkedIn</a>
+            <a href="mailto:marcus@example.com?subject=Great%20meeting%20you"
+                class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-gray-400"
+                aria-label="Send email">Email</a>
+            <a href="tel:+1234567890"
+                class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-gray-400"
+                aria-label="Call phone">Phone</a>
+        </nav>
+
+            <!-- GDPR consent form -->
+        <form id="contact-form" class="space-y-4" novalidate>
+        <div>
+            <label for="name" class="block text-sm font-medium text-gray-300 mb-1">
+            Name <span class="text-red-400">*</span>
+            </label>
+            <input
+            type="text" id="name" name="name" required
+            class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+            aria-required="true"
+            >
+        </div>
+
+        <div>
+            <label for="email" class="block text-sm font-medium text-gray-300 mb-1">
+            Email <span class="text-red-400">*</span>
+            </label>
+            <input
+            type="email" id="email" name="email" required
+            class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+            aria-required="true"
+            >
+        </div>
+
+        <div>
+            <label for="linkedin" class="block text-sm font-medium text-gray-300 mb-1">
+            LinkedIn handle (optional)
+            </label>
+            <input
+            type="text" id="linkedin" name="linkedin"
+            class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+        </div>
+
+        <div>
+            <label for="note" class="block text-sm font-medium text-gray-300 mb-1">
+            What should we discuss next? (optional)
+            </label>
+            <textarea
+            id="note" name="note" rows="3"
+            class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+            ></textarea>
+        </div>
+
+        <!-- GDPR consent checkbox -->
+        <div class="flex items-start gap-2">
+            <input
+            type="checkbox" id="consent" name="consent" required
+            class="mt-1 w-4 h-4 rounded border-gray-600 bg-gray-800 focus:ring-2 focus:ring-blue-400"
+            aria-required="true"
+            >
+            <label for="consent" class="text-sm text-gray-300">
+            I consent to Marcus storing my information to follow up on our conversation. I can request deletion at any time.
+            </label>
+        </div>
+
+        <!-- Cloudflare Turnstile widget (managed mode) -->
+        <div class="cf-turnstile" data-sitekey="YOUR_TURNSTILE_SITEKEY" data-callback="onTurnstileSuccess" data-theme="dark"></div>
+
+        <!-- Submit disabled until Turnstile verifies -->
+        <button
+            type="submit" id="submit-btn" disabled
+            class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium py-3 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+        >
+            Let's Connect
+        </button>
+        </form>
+
+        <!-- Success message (hidden until submission completes) -->
+        <div id="success-message" class="hidden text-center mt-6">
+        <p class="text-green-400 text-lg font-medium">Thanks! Marcus will follow up soon.</p>
+        </div>
+
+    </main>
+      <script>
+    // Enable submit button when Turnstile verifies the visitor is human
+    function onTurnstileSuccess(token) {
+      document.getElementById('submit-btn').disabled = false;
+    }
+
+    // Capture UTM parameters from the QR code URL
+    function getUTMParams() {
+      const params = new URLSearchParams(window.location.search);
+      return {
+        utm_source: params.get('utm_source') || '',
+        utm_medium: params.get('utm_medium') || '',
+        utm_campaign: params.get('utm_campaign') || ''
+      };
+    }
+
+    // Handle form submission to Supabase REST API
+    document.getElementById('contact-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const form = e.target;
+      const submitBtn = document.getElementById('submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending...';
+
+      // Collect form data + UTM attribution
+      const utmParams = getUTMParams();
+      const payload = {
+        name: form.name.value,
+        email: form.email.value,
+        linkedin: form.linkedin.value || null,
+        note: form.note.value || null,
+        consent: true,
+        consent_timestamp: new Date().toISOString(),
+        utm_source: utmParams.utm_source,
+        utm_medium: utmParams.utm_medium,
+        utm_campaign: utmParams.utm_campaign
+      };
+
+      try {
+        // POST to Supabase REST API (visitors table)
+        const response = await fetch('YOUR_SUPABASE_URL/rest/v1/visitors', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': 'YOUR_SUPABASE_ANON_KEY',
+            'Authorization': 'Bearer YOUR_SUPABASE_ANON_KEY',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+          // Hide form and show success message
+          form.classList.add('hidden');
+          document.getElementById('success-message').classList.remove('hidden');
+        } else {
+          throw new Error('Submission failed');
+        }
+      } catch (error) {
+        // Re-enable button on failure
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Let's Connect";
+        alert('Something went wrong. Please try again.');
+      }
+    });
+  </script>
+</body>
+
+</html>
