@@ -19,3 +19,8 @@ Thumbs.db
 tmp/
 dist/
 build/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
